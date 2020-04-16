@@ -1,0 +1,53 @@
+---
+title: 'Chapter02: Modeling A Simple Example'
+author: "David J Jackson"
+date: "4/15/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(plotly)
+library(forecast)
+library(data.table)
+```
+```{r,echo=FALSE}
+c02 <- data.table::fread("./DATA/co2_gr_mlo.txt")
+```
+
+### Mauna Loa Modeling C02 Levels using Linear Regression
+
+```{r,echo=FALSE}
+ggplot(c02) + geom_line(aes(x=year,y=incr)) +
+  labs(title="Mauna Loa",x="Time(Year)",y="C02 Concentration (ppmv)")
+```
+
+#### Easy Method using goem_smooth()
+
+```{r, echo=FALSE}
+
+ggplot(c02) + geom_line(aes(x=year,y=incr)) +
+  labs(title="Mauna Loa C02 Levels: 1959 - 2019",x="Time(Year)",y="C02 Concentration (ppmv)",subtitle="(Plotting lm the easy way)") +
+  geom_smooth(aes(x=year,y=incr),method="lm")
+```
+
+#### More Difficult Method Plotting (using base R)lm function
+
+
+```{r, echo=FALSE}
+xfit <-  lm(c02$incr~c02$year)
+summary(xfit)
+```
+```{r, echo=FALSE}
+yfitted <- as.data.table(xfit$fitted.values)
+colnames(yfitted) <- c("fitted")
+yresiduals <- as.data.table(xfit$residuals)
+colnames(yresiduals) <- c("residuals")
+df <- cbind(c02,yfitted,yresiduals)
+```
+```{r, echo=FALSE}
+ggplot(c02) + geom_line(aes(x=year,y=incr,col="C02 Levels")) +
+  labs(title="Mauna Loa C02 Levels: 1959 - 2019",x="Time(Year)",y="C02 Concentration (ppmv)") + geom_line(data=df,aes(x=year,y=fitted,col="lm fitted"))
+```
+

@@ -1,0 +1,47 @@
+---
+title: 'Chapter1: LIght Curves'
+author: "David J Jackson"
+date: "4/15/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(plotly)
+```
+```{r}
+Mira <- read_csv("./DATA/Mira.csv")
+Mira <- janitor::clean_names(Mira)
+Mira$star_name <- "MIRA"
+Mira$magnitude <- as.numeric(Mira$magnitude)
+Mira <- Mira %>% filter(band=="Vis.")
+```
+```{r}
+ggplot(Mira) + geom_histogram(aes(x=magnitude)) +
+  labs(title="Histogram of Mira",x="Magnitude",y="Count of Observations")
+```
+```{r}
+ggplot(Mira) +geom_point(aes(x=jd,y=magnitude))
+```
+
+```{r}
+OMI_CET <- read_csv("./DATA/OMI_CET.csv")
+OMI_CET <- janitor::clean_names(OMI_CET)
+OMI_CET$star_name <- "OMI_CET"
+OMI_CET$magnitude <- as.numeric(OMI_CET$magnitude)
+OMI_CET <- OMI_CET %>% filter(band=="Vis.")
+```
+```{r}
+ggplot(OMI_CET) + geom_histogram(aes(x=magnitude)) +
+  labs(title="Histogram of OMI_CET",x="Magnitude",y="Count of Observations")
+```
+```{r}
+OMI_CET$M10 <- forecast::ma(OMI_CET$magnitude,order=20)
+ggplot(OMI_CET) +geom_point(aes(x=jd,y=magnitude)) +
+  geom_smooth(aes(x=jd,y=magnitude,col="Loess")) +
+  geom_line(aes(x=jd,y=M10,col="10 Day"))
+```
+
+
+
