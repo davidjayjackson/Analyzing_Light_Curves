@@ -1,7 +1,7 @@
 ---
 title: 'Chapter02: Modeling A Simple Example'
 author: "David J Jackson"
-date: "4/15/2020"
+date: "4/17/2020"
 output: html_document
 ---
 
@@ -11,32 +11,39 @@ library(tidyverse)
 library(plotly)
 library(forecast)
 library(data.table)
+theme_set(theme_minimal())
 ```
 ```{r,echo=FALSE}
-c02 <- data.table::fread("./DATA/co2_gr_mlo.txt")
+rm(list=ls())
+CO2 <- data.table::fread("./DATA/co2_gr_mlo.txt")
+colnames(CO2) <- c("t","x","unc") # t = year and x = ppm
+# CO2$Ymd <- as.Date(paste(CO2$yr,CO2$mon,CO2$day,sep="-"))
+# 
+# CO2_weekly <- data.table::fread("./DATA/co2_weekly_mlo.txt")
+# CO2_weekly$Ymd <- as.Date(paste(CO2_weekly$yr,CO2_weekly$mon,CO2_weekly$day,sep="-"))
 ```
 
-### Mauna Loa Modeling C02 Levels using Linear Regression
+### Mauna Loa Modeling CO2 Levels using Linear Regression
 
 ```{r,echo=FALSE}
-ggplot(c02) + geom_line(aes(x=year,y=incr)) +
-  labs(title="Mauna Loa",x="Time(Year)",y="C02 Concentration (ppmv)")
+gg <- ggplot(CO2) + geom_line(aes(x=t,y=x)) +
+  labs(title="Mauna Loa",x="Date(YYYYMMDD)",y="CO2 Concentration (ppmv)")
+ggplotly(gg)
 ```
 
 #### Easy Method using goem_smooth()
 
 ```{r, echo=FALSE}
 
-ggplot(c02) + geom_line(aes(x=year,y=incr)) +
-  labs(title="Mauna Loa C02 Levels: 1959 - 2019",x="Time(Year)",y="C02 Concentration (ppmv)",subtitle="(Plotting lm the easy way)") +
-  geom_smooth(aes(x=year,y=incr),method="lm")
+ggplot(CO2) + geom_point(aes(x=t,y=x)) +
+  labs(title="Mauna Loa CO2 Levels: 1959 - 2019",x="Time(Year)",y="CO2 Concentration (ppmv)",subtitle="(Plotting lm the easy way)") +
+  geom_smooth(aes(x=t,y=x),method="lm")
 ```
 
 #### More Difficult Method Plotting (using base R)lm function
 
-
 ```{r, echo=FALSE}
-xfit <-  lm(c02$incr~c02$year)
+xfit <-  lm(CO2$x~CO2$t)
 summary(xfit)
 ```
 ```{r, echo=FALSE}
@@ -44,10 +51,65 @@ yfitted <- as.data.table(xfit$fitted.values)
 colnames(yfitted) <- c("fitted")
 yresiduals <- as.data.table(xfit$residuals)
 colnames(yresiduals) <- c("residuals")
-df <- cbind(c02,yfitted,yresiduals)
+df <- cbind(CO2,yfitted,yresiduals)
 ```
 ```{r, echo=FALSE}
-ggplot(c02) + geom_line(aes(x=year,y=incr,col="C02 Levels")) +
-  labs(title="Mauna Loa C02 Levels: 1959 - 2019",x="Time(Year)",y="C02 Concentration (ppmv)") + geom_line(data=df,aes(x=year,y=fitted,col="lm fitted"))
+ggplot(CO2) + geom_line(aes(x=t,y=x,col="CO2 Levels")) +
+  labs(title="Mauna Loa CO2 Levels: 1959 - 2019",x="Time(Year)",y="CO2 Concentration (ppmv)") + geom_line(data=df,aes(x=t,y=fitted,col="LM Fitted"))
+
+ggplot(df) + geom_point(aes(x=t,y=residuals,col="residuals")) +
+  labs(title="Mauna Loa CO2 Residuals: 1959 - 2019",x="Time(Year)",y="CO2 Concentration  (ppmv)")
 ```
+
+#### More Elaborate Trend: Quadratic Model
+
+```{r, echo=FALSE}
+df1 <- df
+df1 <- df1 %>% mutate(tsqr = t^2)
+# df1$tsquared <- CO2$t^2
+```
+```{r,echo=FALSE}
+xfit2 <- lm(df1$residuals ~ df1$t+df1$tsqr)
+```
+```{r,echo=FALSE}
+yfitted2 <- as.data.table(xfit2$fitted.values)
+colnames(yfitted2) <- c("fitted")
+yresiduals2 <- as.data.table(xfit2$residuals)
+colnames(yresiduals2) <- c("residuals")
+df1 <- cbind(CO2,yfitted2,yresiduals2)
+
+```
+```{r,echo=FALSE}
+df1 %>% ggplot() + geom_point(aes(x=t,y=residuals,col="residuals")) +
+  geom_line(aes(x=t,y=fitted,col="fitted")) +
+  labs(title="Mauna Loa CO2: Quadratic Model(residuals ~ t+tsqr)")
+  
+  
+```
+
+```{r, echo=FALSE}
+df2 <- df
+df2 <- df2 %>% mutate(tsqr = t^2)
+
+```
+```{r,echo=FALSE}
+xfit3 <- lm(df2$x ~ df2$t+df2$tsqr)
+```
+```{r,echo=FALSE}
+yfitted3 <- as.data.table(xfit3$fitted.values)
+colnames(yfitted3) <- c("fitted")
+yresiduals3 <- as.data.table(xfit3$residuals)
+colnames(yresiduals3) <- c("residuals")
+df2 <- cbind(df2,yfitted3,yresiduals3)
+
+```
+```{r,echo=FALSE}
+df1 %>% ggplot() + geom_point(aes(x=t,y=residuals,col="residuals")) +
+  geom_line(aes(x=t,y=fitted,col="fitted"))+
+  labs(title="Mauna Loa CO2: Quadratic Model (lm(x ~ t+tsqr)")
+  
+  
+```
+
+
 
