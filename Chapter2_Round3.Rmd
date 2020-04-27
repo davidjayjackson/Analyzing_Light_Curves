@@ -1,0 +1,124 @@
+---
+title: "Round 3: Analyzing Live Curves"
+author: "David J Jackson"
+date: "4/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+# Analyzing Light Curves, A Practical Guide
+## By Grant Foster
+
+## 2.1 Visual Inspection
+
+```{r, echo=FALSE}
+rm(list=ls())
+C02 <- read.table("./DATA/co2_gr_mlo.txt",header=TRUE)
+t <-  C02[,1]
+x <- C02[,2]
+```
+```{r, echo=FALSE}
+plot(t,x,pch=".",cex=3,
+     xlab="Time (Years)",
+     ylab="C02 concentration (ppmv)",
+     main="Mauna Loa",
+     cex.axis=1,
+     cex.lab=1,
+     cex.main=1.5)
+```
+
+## 2.2 Simplest Model: Linear Trend
+
+
+```{r, echo=FALSE}
+xfit1 <- lm(x~t)
+summary(xfit1)
+```
+```{r, echo=FALSE}
+plot(t,x,pch=".",cex=3,
+     xlab="Time (Years)",
+     ylab="C02 concentration (ppmv)",
+     main="Mauna Loa",
+     cex.axis=1,
+     cex.lab=1,
+     cex.main=1.5)
+lines(t,xfit1$fitted.values,col="red",lwd=3 )
+```
+
+## First Residuals Fit(figure 2.3)
+
+```{r, echo=FALSE}
+plot(t,xfit1$residuals,pch=".",cex=3,
+     xlab="Time (Years)",
+     ylab="Residuals(ppmv)",
+     main="Mauna Loa",
+     cex.axis=1,
+     cex.lab=1,
+     cex.main=1.5)
+# lines(t,xfit1$fitted.values,col="red",lwd=3 )
+```
+
+##  More Elaborate Trend: Quadratic Model
+
+```{r, echo=FALSE}
+tsquared <- t^2
+xfit2 <- lm(xfit1$residuals ~t + tsquared)
+```
+```{r, echo=FALSE}
+plot(t,xfit2$residuals,pch=".",cex=3,
+     xlab="Time (Years)",
+     ylab="Residuals ppmv)",
+     main="Mauna Loa (residuals ~t + tsquared)",
+     cex.axis=1,
+     cex.lab=1,
+     cex.main=1.5)
+
+lines(t,xfit2$fitted.values,col="red",lwd=3 )
+```
+```{r}
+xfit3 <- lm(x ~ t+tsquared)
+str(xfit3)
+```
+```{r, echo=FALSE}
+plot(t,x,pch=".",cex=3,
+     xlab="Time (Years)",
+     ylab=" C02 concentration(ppmv)",
+     main="Mauna Loa (x ~ t+tsquared)",
+     cex.axis=1,
+     cex.lab=1,
+     cex.main=1.5)
+
+lines(t,xfit3$fitted.values,col="red",lwd=3 )
+```
+
+## 2.4 Periodic Fluctuation
+
+```{r, echo=FALSE}
+plot(t,xfit3$residuals,pch=".",cex=3,
+     xlab="Time (Years)",
+     ylab="Residuals ppmv)",
+     main="Mauna Loa (residuals ~t + tsquared)",
+     cex.axis=1,
+     cex.lab=1,
+     cex.main=1.5)
+
+# lines(t,xfit3$fitted.values,col="red",lwd=3 )
+```
+
+
+```{r, echo=FALSE}
+plot(t,xfit3$residuals,type="o",pch=".",cex=3,
+     xlab="Time (Years)",
+     xlim=c(2000,2010),
+     ylab="Residuals (ppmv)",
+     main="Mauna Loa (residuals ~t + tsquared)",
+     cex.axis=1,
+     cex.lab=1,
+     cex.main=1.5)
+
+# lines(t,xfit3$fitted.values,col="red",lwd=3 )
+```
