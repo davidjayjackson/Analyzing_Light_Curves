@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+theme_set(theme_linedraw())
 ```
 
 # Analyzing Light Curves, A Practical Guide
@@ -141,4 +142,55 @@ plot(t,x,pch=".",cex=3,
      cex.main=1.5)
 
 lines(t,xfit4$fitted.values,col="red",lwd=2 )
+```
+
+## 2.4 More Elaborate Periodic Fluctuation
+
+```{r}
+c1 <- cos(2*pi*t)
+s1 <- sin(2*pi*t)
+c2 <- cos(4*pi*t)
+s2 <- sin(4*pi*t)
+c3 <- cos(6*pi*t)
+s3 <- sin(6*pi*t)
+
+xfit5 <- lm(x ~t+tsquared +c1+s1+c2+s2+c3+s3)
+```
+```{r, echo=FALSE}
+plot(t,x,pch=".",cex=3,
+     
+     xlab="Time (Years)",
+     xlim = c(2000,2020),
+     ylim = c(1,3.5),
+     ylab=" C02 ",
+     main="Mauna Loa",
+     cex.axis=1,
+     cex.lab=1,
+     cex.main=1.5)
+
+lines(t,xfit5$fitted.values,col="red",lwd=2 )
+```
+
+```{r, echo=FALSE}
+plot(t,xfit5$residuals,type="o",pch=".",cex=3,
+     xlab="Time (Years)",
+     ylab="Residuals (ppmv)",
+     main="Mauna Loa CO2",
+     cex.axis=1,
+     cex.lab=1,
+     cex.main=1.5)
+
+# lines(t,xfit3$fitted.values,col="red",lwd=3 )
+```
+```{r, echo=FALSE}
+plot(t,xfit5$residuals,type="o",pch=".",cex=3,
+     xlab="Time (Years)",
+     xlim = c(2000,2020),
+     ylab="Residuals (ppmv)",
+     main="Mauna Loa CO2",
+     cex.axis=1,
+     cex.lab=1,
+     cex.main=1.5)
+
+# lines(t,xfit3$fitted.values,col="red",lwd=3 )
 ```
