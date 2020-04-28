@@ -1,0 +1,35 @@
+---
+title: "Chapter 4 Signal"
+author: "David J Jackson"
+date: "4/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+theme_set(theme_linedraw())
+```
+
+## Analyzing Lightcurve: EPS AUR
+
+```{r}
+library(tidyverse)
+theme_set(theme_linedraw())
+```
+```{r, echo=FALSE}
+rm(list=ls())
+eps_aur <- read.table("./DATA/eps_aur.csv",header=TRUE,sep=",")
+t <-  eps_aur[,1]
+x <- eps_aur[,2]
+```
+```{r, echo=FALSE}
+plot(t,x,pch=".",cex=3,
+     xlab="Julian Date",
+     ylab="Magnitude",
+     main="Eps Aur",
+     cex.axis=1,
+     cex.lab=1,
+     cex.main=1.5)
+```
+
